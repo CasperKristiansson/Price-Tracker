@@ -1,0 +1,5 @@
+price_tracking_venv
+.pytest_cache
+.vscode
+test.py
+Price_Tracker_venv
