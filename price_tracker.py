@@ -2,6 +2,7 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 import re
 import pandas
+import requests
 
 def elgiganten_price(url):
     url = Request(
@@ -44,9 +45,42 @@ def webhallen_price(url):
     return price
 
 def amazon_de_price(url):
-    print("")
+    headers = {
+        "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36', 
+        "Accept-Encoding":"gzip, deflate", 
+        "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", 
+        "DNT":"1",
+        "Connection":"close", 
+        "Upgrade-Insecure-Requests":"1"
+    }
+
+    page = requests.get(url, headers=headers)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    price = soup.find(id="priceblock_ourprice").get_text()
+    price = price[ 0 : price.index(".")]
+    price = re.sub("[^0-9]", "", price)
+    price = round(int(price) * 10.15)
+    return price
+
 def amazon_sv_price(url):
-    print("")
+    headers = {
+        "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36', 
+        "Accept-Encoding":"gzip, deflate", 
+        "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", 
+        "DNT":"1",
+        "Connection":"close", 
+        "Upgrade-Insecure-Requests":"1"
+    }
+
+    page = requests.get(url, headers=headers)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    price = soup.find(id="priceblock_ourprice").get_text()
+    price = price[ 0 : price.index(",")]
+    price = re.sub("[^0-9]", "", price)
+
+    return price
 
 def get_data():
     product_url = []
@@ -79,7 +113,6 @@ def get_price(urls, companies):
             product_price.append(amazon_sv_price(url))
         elif companies[urls.index(url)] == '0':
             product_price.append('Error with formating in Excel (no header): {}'.format(url))
-        print(product_price)
             
     return product_price
 
