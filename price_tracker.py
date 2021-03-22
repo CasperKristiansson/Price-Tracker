@@ -31,17 +31,10 @@ def netonnet_price(url):
 
     return price
 
-def webhallen_price(url): #TODO Webscraping Not Working
-    url = Request(
-        url,
-        headers={'User-Agent': 'Mozilla/5.0'}
-        )
-    webpage = urlopen(url).read()
-
-    soup = BeautifulSoup(webpage, 'html.parser')
-    price = str(soup.find('div', {"class": "price-value _large _center"}))
-    price = re.sub("[^0-9]", "", price)
-    price = 'null'
+def webhallen_price(url):
+    with requests.Session() as session:
+        response = session.get(url).json()
+        price = response["product"]["price"]["price"]
 
     return price
 
@@ -107,10 +100,10 @@ def get_price(urls, companies):
             except:
                 product_price.append("null")
         elif companies[urls.index(url)] == 'webbhallen':
-            try:
-                product_price.append(webhallen_price(url))
-            except:
-                product_price.append("null")
+            #try:
+            product_price.append(webhallen_price(url))
+            #except:
+                #product_price.append("null")
         elif companies[urls.index(url)] == 'netonnet':
             try:
                 product_price.append(netonnet_price(url))
@@ -168,7 +161,6 @@ def main():
     PRODUCT_URL, COMPANIES, EXCEL_DATA = data()
     PRODUCT_PRICE = get_price(PRODUCT_URL, COMPANIES)
     write_data(PRODUCT_PRICE, EXCEL_DATA, COMPANIES)
-
 
 if __name__ == '__main__':
     main()
